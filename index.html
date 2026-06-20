@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services List Recommendation & Reviews</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #533AB7; --purple-light: #EEEDFE; --purple-mid: #7F77DD;
+    --teal-light: #EAF3DE; --teal-dark: #3B6D11; --teal-mid: #639922;
+    --amber-light: #FAEEDA; --amber-dark: #854F0B; --amber-mid: #BA7517;
+    --coral-light: #FAECE7; --coral-dark: #993C1D; --coral-mid: #D85A30;
+    --border: rgba(0,0,0,0.12); --border-md: rgba(0,0,0,0.22);
+    --bg: #f5f5f3; --surface: #ffffff; --text: #1a1a18; --muted: #5f5e5a;
+    --radius: 8px; --radius-lg: 12px; --star: #F5A623;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 16px; }
+  .container { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .arabic-desc { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 24px; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 14px; line-height: 1.9; color: var(--text); }
+  .arabic-intro { margin-bottom: 12px; font-size: 14px; }
+  .arabic-section-title { font-weight: 600; margin-top: 12px; margin-bottom: 4px; color: var(--purple); font-size: 14px; }
+  .arabic-desc ul { padding-right: 20px; padding-left: 0; margin: 0; }
+  .arabic-desc ul li { margin-bottom: 4px; font-size: 13px; color: var(--muted); }
+  .tabs { display: flex; margin-bottom: 24px; gap: 8px; }
+  .tab { padding: 11px 22px; font-size: 14px; cursor: pointer; border: none; border-radius: var(--radius) var(--radius) 0 0; background: #d6d4ce; color: #4a4945; font-weight: 500; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+  .tab.active { background: var(--purple); color: #ffffff; }
+  .tab:hover:not(.active) { background: #c2c0ba; color: var(--text); }
+  .page { display: none; } .page.active { display: block; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; margin-top: 16px; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea { width: 100%; font-size: 14px; padding: 9px 11px; border: 0.5px solid var(--border-md); border-radius: var(--radius); background: var(--surface); color: var(--text); font-family: inherit; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--purple-mid); box-shadow: 0 0 0 3px rgba(127,119,221,.15); }
+  textarea { resize: vertical; min-height: 80px; }
+  .star-btn { font-size: 32px; cursor: pointer; color: #ddd; background: none; border: none; padding: 0 2px; line-height: 1; transition: color .1s; }
+  .star-btn.active { color: var(--star); }
+  .star-row { display: flex; gap: 2px; margin-top: 6px; }
+  .star-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .submit-btn { width: 100%; margin-top: 22px; padding: 11px; background: var(--purple); color: #fff; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .submit-btn:hover { background: #3C3489; }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .alert { display: none; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; margin-top: 14px; align-items: center; gap: 8px; }
+  .alert.show { display: flex; }
+  .alert-success { background: var(--teal-light); border: 0.5px solid var(--teal-mid); color: var(--teal-dark); }
+  .alert-error { background: var(--coral-light); border: 0.5px solid var(--coral-mid); color: var(--coral-dark); }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-row input, .filter-row select { flex: 1; min-width: 130px; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 12px; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--purple-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--purple); flex-shrink: 0; }
+  .card-body { flex: 1; min-width: 0; }
+  .card-name { font-size: 15px; font-weight: 500; }
+  .card-phone { font-size: 13px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .card-meta { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; align-items: center; }
+  .badge { font-size: 12px; padding: 3px 10px; border-radius: 6px; font-weight: 500; }
+  .badge-svc { background: var(--purple-light); color: var(--purple); }
+  .card-notes { font-size: 12px; color: var(--muted); margin-top: 7px; font-style: italic; }
+  .stars-display { display: flex; align-items: center; gap: 4px; }
+  .stars-display .s { font-size: 16px; }
+  .stars-display .avg { font-size: 13px; font-weight: 600; color: var(--text); }
+  .stars-display .rc { font-size: 11px; color: var(--muted); }
+  .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay { text-align: center; padding: 2rem; color: var(--muted); font-size: 14px; }
+  .cnt-badge { font-size: 12px; background: #eee; border-radius: 999px; padding: 2px 8px; color: var(--muted); margin-left: 6px; }
+  #other-wrap { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><i class="ti ti-briefcase" style="font-size:22px;vertical-align:-3px;margin-right:6px"></i>Services List Recommendation & Reviews</h1>
+
+  <div class="arabic-desc" dir="rtl" lang="ar">
+    <p class="arabic-section-title">شروط إضافة الفني:</p>
+    <ul>
+      <li>الكفاءة والخبرة المهنية.</li>
+      <li>حسن السيرة، السلوك، والمصداقية.</li>
+      <li>أن تكون التوصية مبنية على تجربة فعلية.</li>
+    </ul>
+    <p class="arabic-section-title">إخلاء مسؤولية:</p>
+    <ul>
+      <li>الملف تطوعي وغير ربحي، والتقييمات تعبر عن آراء أصحابها وتجاربهم الشخصية.</li>
+      <li>يقتصر دورنا على تجميع وتبادل المعلومات فقط، ولا نتحمل أي مسؤولية عن: جودة الخدمات، الأسعار، الاتفاقيات المالية، أو أي أضرار ناتجة عن التعامل.</li>
+      <li>وجود الفني في القائمة لا يعد ضماناً لجودة عمله، ويتم احتساب متوسط التقييمات تلقائياً.</li>
+    </ul>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('add')"><i class="ti ti-plus"></i> Add professional</button>
+    <button class="tab" onclick="showTab('view')"><i class="ti ti-users"></i> View directory <span class="cnt-badge" id="cnt">—</span></button>
+  </div>
+
+  <!-- ADD PAGE -->
+  <div id="add" class="page active">
+    <label for="f-name">Full name</label>
+    <input type="text" id="f-name" placeholder="e.g. John Smith">
+
+    <label for="f-phone">Phone number</label>
+    <input type="tel" id="f-phone" placeholder="e.g. 9055550123 (10 digits)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+
+    <label for="f-service">Service type</label>
+    <select id="f-service" onchange="toggleOther()">
+      <option value="">— Select a service —</option>
+      <optgroup label="🔧 Home Maintenance Trades">
+        <option>Appliance Repair</option>
+        <option>Carpentry</option>
+        <option>Cleaning</option>
+        <option>Concrete &amp; Masonry</option>
+        <option>Drywall &amp; Plastering</option>
+        <option>Electrical</option>
+        <option>Flooring</option>
+        <option>Garage Doors</option>
+        <option>Handyman</option>
+        <option>HVAC</option>
+        <option>Insulation</option>
+        <option>Landscaping</option>
+        <option>Moving &amp; Junk Removal</option>
+        <option>Painting</option>
+        <option>Pest Control</option>
+        <option>Plumbing</option>
+        <option>Pool &amp; Spa</option>
+        <option>Roofing</option>
+        <option>Security Systems</option>
+        <option>Snow Removal</option>
+        <option>Tiling</option>
+        <option>Windows &amp; Doors</option>
+      </optgroup>
+      <optgroup label="💼 Professional Services">
+        <option>Accountant</option>
+        <option>Architect</option>
+        <option>Engineer</option>
+        <option>Financial Advisor</option>
+        <option>Home Inspector</option>
+        <option>Insurance Broker</option>
+        <option>Interior Designer</option>
+        <option>Lawyer / Notary</option>
+        <option>Mortgage Broker</option>
+        <option>Property Manager</option>
+        <option>Real Estate Agent</option>
+        <option>Tax Consultant</option>
+      </optgroup>
+      <optgroup label="➕ Other">
+        <option value="Other">Other…</option>
+      </optgroup>
+    </select>
+
+    <div id="other-wrap">
+      <label for="f-other">Describe the service</label>
+      <input type="text" id="f-other" placeholder="e.g. Solar panel installation">
+    </div>
+
+    <label>Overall service Rating</label>
+    <div class="star-row" id="star-row">
+      <button class="star-btn" data-val="1" onclick="selectStar(1)">★</button>
+      <button class="star-btn" data-val="2" onclick="selectStar(2)">★</button>
+      <button class="star-btn" data-val="3" onclick="selectStar(3)">★</button>
+      <button class="star-btn" data-val="4" onclick="selectStar(4)">★</button>
+      <button class="star-btn" data-val="5" onclick="selectStar(5)">★</button>
+    </div>
+    <div class="star-hint" id="star-hint">Click to rate</div>
+    <input type="hidden" id="f-rating">
+
+    <label for="f-notes">Additional notes (optional)</label>
+    <textarea id="f-notes" placeholder="Any extra details about this professional or the work done…"></textarea>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-check" id="submit-icon"></i>
+      <span id="submit-label">Save professional</span>
+    </button>
+    <div class="alert alert-success" id="success-msg"><i class="ti ti-circle-check"></i> Professional saved successfully!</div>
+    <div class="alert alert-error" id="error-msg"><i class="ti ti-alert-circle"></i> <span id="error-text">Something went wrong.</span></div>
+  </div>
+
+  <!-- VIEW PAGE -->
+  <div id="view" class="page">
+    <div class="filter-row">
+      <input type="text" id="fil-name" placeholder="Search by name…" oninput="renderCards()">
+      <select id="fil-service" onchange="renderCards()">
+        <option value="">All services</option>
+        <optgroup label="🔧 Home Maintenance Trades">
+          <option>Appliance Repair</option>
+          <option>Carpentry</option>
+          <option>Cleaning</option>
+          <option>Concrete &amp; Masonry</option>
+          <option>Drywall &amp; Plastering</option>
+          <option>Electrical</option>
+          <option>Flooring</option>
+          <option>Garage Doors</option>
+          <option>Handyman</option>
+          <option>HVAC</option>
+          <option>Insulation</option>
+          <option>Landscaping</option>
+          <option>Moving &amp; Junk Removal</option>
+          <option>Painting</option>
+          <option>Pest Control</option>
+          <option>Plumbing</option>
+          <option>Pool &amp; Spa</option>
+          <option>Roofing</option>
+          <option>Security Systems</option>
+          <option>Snow Removal</option>
+          <option>Tiling</option>
+          <option>Windows &amp; Doors</option>
+        </optgroup>
+        <optgroup label="💼 Professional Services">
+          <option>Accountant</option>
+          <option>Architect</option>
+          <option>Engineer</option>
+          <option>Financial Advisor</option>
+          <option>Home Inspector</option>
+          <option>Insurance Broker</option>
+          <option>Interior Designer</option>
+          <option>Lawyer / Notary</option>
+          <option>Mortgage Broker</option>
+          <option>Property Manager</option>
+          <option>Real Estate Agent</option>
+          <option>Tax Consultant</option>
+        </optgroup>
+        <optgroup label="➕ Other">
+          <option value="Other">Other</option>
+        </optgroup>
+      </select>
+      <select id="fil-rating" onchange="renderCards()">
+        <option value="">All ratings</option>
+        <option value="5">★★★★★ 5</option>
+        <option value="4">★★★★ 4+</option>
+        <option value="3">★★★ 3+</option>
+        <option value="2">★★ 2+</option>
+        <option value="1">★ 1+</option>
+      </select>
+    </div>
+    <div id="cards-container"><div class="loading-overlay">Click "View directory" to load</div></div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqeY1jAk8eD3Tc2dEUZTJNuRaLsfkeHcQDnDWveLb2O5EOjVcJwNzwWBnwEXBrj98tiQ/exec';
+let allPros = [];
+let selectedStar = 0;
+const starLabels = ['','Poor','Fair','Good','Very good','Excellent'];
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['add','view'][i] === t));
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
+  if (t === 'view') loadPros();
+}
+
+function toggleOther() {
+  document.getElementById('other-wrap').style.display =
+    document.getElementById('f-service').value === 'Other' ? 'block' : 'none';
+}
+
+function selectStar(val) {
+  selectedStar = val;
+  document.getElementById('f-rating').value = val;
+  document.querySelectorAll('.star-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+    b.style.color = '';
+  });
+  document.getElementById('star-hint').textContent = val + ' star' + (val > 1 ? 's' : '') + ' — ' + starLabels[val];
+}
+
+document.getElementById('star-row').addEventListener('mouseover', e => {
+  if (!e.target.classList.contains('star-btn')) return;
+  const hov = parseInt(e.target.dataset.val);
+  document.querySelectorAll('.star-btn').forEach(b => {
+    b.style.color = parseInt(b.dataset.val) <= hov ? 'var(--star)' : '#ddd';
+  });
+});
+document.getElementById('star-row').addEventListener('mouseleave', () => {
+  document.querySelectorAll('.star-btn').forEach(b => { b.style.color = ''; });
+});
+
+async function submitForm() {
+  const name   = document.getElementById('f-name').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
+  const svc    = document.getElementById('f-service').value;
+  const other  = document.getElementById('f-other').value.trim();
+  const rating = document.getElementById('f-rating').value;
+  const notes  = document.getElementById('f-notes').value.trim();
+  if (!name || !phone || !svc || !rating) { alert('Please fill in name, phone, service, and rating.'); return; }
+  if (phone.length !== 10) { alert('Phone number must be exactly 10 digits.'); return; }
+  const service = svc === 'Other' ? (other || 'Other') : svc;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('submit-icon').style.display = 'none';
+  document.getElementById('submit-label').textContent = 'Saving…';
+  document.getElementById('success-msg').classList.remove('show');
+  document.getElementById('error-msg').classList.remove('show');
+  try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ name, phone, service, rating, notes }) });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      document.getElementById('success-msg').classList.add('show');
+      ['f-name','f-phone','f-other','f-notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-service').value = '';
+      document.getElementById('other-wrap').style.display = 'none';
+      document.getElementById('f-rating').value = '';
+      document.getElementById('star-hint').textContent = 'Click to rate';
+      selectedStar = 0;
+      document.querySelectorAll('.star-btn').forEach(b => { b.classList.remove('active'); b.style.color = ''; });
+      setTimeout(() => document.getElementById('success-msg').classList.remove('show'), 5000);
+    } else { throw new Error(data.message || 'Unknown error'); }
+  } catch (err) {
+    document.getElementById('error-text').textContent = err.message || 'Could not reach the script.';
+    document.getElementById('error-msg').classList.add('show');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('submit-icon').style.display = '';
+    document.getElementById('submit-label').textContent = 'Save professional';
+  }
+}
+
+function loadPros() {
+  document.getElementById('cards-container').innerHTML = '<div class="loading-overlay"><i class="ti ti-loader" style="font-size:24px;display:block;margin-bottom:8px"></i>Loading…</div>';
+  const cb = 'cb_' + Date.now();
+  window[cb] = function(resp) {
+    delete window[cb];
+    console.log('Raw response:', JSON.stringify(resp));
+    if (resp && resp.status === 'ok') {
+      allPros = (resp.data || []).map(normalizeKeys);
+      console.log('Normalized allPros:', JSON.stringify(allPros));
+      document.getElementById('cnt').textContent = allPros.length;
+      renderCards();
+    } else {
+      document.getElementById('cards-container').innerHTML = '<div class="loading-overlay" style="color:#993C1D">Could not load data. Please try again.</div>';
+    }
+  };
+  const s = document.createElement('script');
+  s.onerror = () => {
+    delete window[cb];
+    document.getElementById('cards-container').innerHTML = '<div class="loading-overlay" style="color:#993C1D">Could not load data. Please try again.</div>';
+  };
+  setTimeout(() => {
+    if (window[cb]) {
+      delete window[cb];
+      document.getElementById('cards-container').innerHTML = '<div class="loading-overlay" style="color:#993C1D">Request timed out. Please try again.</div>';
+    }
+  }, 15000);
+  s.src = SCRIPT_URL + '?callback=' + cb;
+  document.head.appendChild(s);
+}
+
+function starsHtml(avg) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    if (avg >= i) s += '<span class="s" style="color:var(--star)">★</span>';
+    else if (avg >= i - 0.5) s += '<span class="s" style="color:var(--star)">½</span>';
+    else s += '<span class="s" style="color:#ddd">★</span>';
+  }
+  return s;
+}
+
+function initials(name) { return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+const KNOWN_SERVICES = [
+  'Appliance Repair','Carpentry','Cleaning','Concrete & Masonry','Drywall & Plastering',
+  'Electrical','Flooring','Garage Doors','Handyman','HVAC','Insulation','Landscaping',
+  'Moving & Junk Removal','Painting','Pest Control','Plumbing','Pool & Spa','Roofing',
+  'Security Systems','Snow Removal','Tiling','Windows & Doors',
+  'Accountant','Architect','Engineer','Financial Advisor','Home Inspector',
+  'Insurance Broker','Interior Designer','Lawyer / Notary','Mortgage Broker',
+  'Property Manager','Real Estate Agent','Tax Consultant'
+];
+
+function normalizeKeys(obj) {
+  const out = {};
+  Object.keys(obj).forEach(k => { out[k.trim()] = String(obj[k] || '').trim(); });
+  // Also map lowercase variants
+  if (!out.Name && out.name) out.Name = out.name;
+  if (!out.Phone && out.phone) out.Phone = out.phone;
+  if (!out.Service && out.service) out.Service = out.service;
+  if (!out.Rating && out.rating) out.Rating = out.rating;
+  if (!out.Notes && out.notes) out.Notes = out.notes;
+  if (!out.Date && out.date) out.Date = out.date;
+  return out;
+}
+
+function renderCards() {
+  const nameQ   = document.getElementById('fil-name').value.toLowerCase();
+  const svcQ    = document.getElementById('fil-service').value;
+  const ratingQ = parseFloat(document.getElementById('fil-rating').value) || 0;
+
+  const grouped = {};
+  allPros.forEach(p => {
+    const key = String(p.Phone || '').replace(/\D/g,'') + '|' + String(p.Service || '');
+    if (!grouped[key]) grouped[key] = { ...p, ratings: [], notes: [] };
+    const r = parseFloat(p.Rating);
+    if (!isNaN(r)) grouped[key].ratings.push(r);
+    if (p.Notes) grouped[key].notes.push(p.Notes);
+    grouped[key].Name = p.Name;
+    grouped[key].Service = p.Service;
+    grouped[key].Date = p.Date;
+  });
+
+  let cards = Object.values(grouped).map(p => {
+    const avg = p.ratings.length ? p.ratings.reduce((a,b)=>a+b,0) / p.ratings.length : 0;
+    return { ...p, avg, reviewCount: p.ratings.length };
+  });
+
+  cards = cards.filter(p => {
+    if (nameQ && !String(p.Name||'').toLowerCase().includes(nameQ)) return false;
+    if (svcQ) {
+      if (svcQ === 'Other' && KNOWN_SERVICES.includes(p.Service)) return false;
+      if (svcQ !== 'Other' && p.Service !== svcQ) return false;
+    }
+    if (ratingQ && p.avg < ratingQ) return false;
+    return true;
+  });
+
+  cards.sort((a,b) => b.avg - a.avg);
+  document.getElementById('cnt').textContent = cards.length;
+
+  const c = document.getElementById('cards-container');
+  if (!cards.length) { c.innerHTML = '<div class="loading-overlay">No professionals found. Try clearing the filters.</div>'; return; }
+
+  c.innerHTML = cards.map(p => `
+    <div class="card">
+      <div class="avatar">${initials(p.Name||'?')}</div>
+      <div class="card-body">
+        <div class="card-name">${p.Name}</div>
+        <div class="card-phone"><i class="ti ti-phone" style="font-size:12px"></i> ${p.Phone}</div>
+        <div class="card-meta">
+          <span class="badge badge-svc">${p.Service}</span>
+          <span class="stars-display">
+            ${starsHtml(p.avg)}
+            <span class="avg">${p.avg.toFixed(1)}</span>
+            <span class="rc">(${p.reviewCount} review${p.reviewCount !== 1 ? 's' : ''})</span>
+          </span>
+        </div>
+        ${p.notes.length ? `<div class="card-notes">${[...new Set(p.notes)].join(' · ')}</div>` : ''}
+        <div style="font-size:11px;color:#aaa;margin-top:6px">Last updated: ${p.Date}</div>
+      </div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
